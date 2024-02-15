@@ -1,4 +1,4 @@
-module github.com/munene-m/todo-app-api
+module github.com/munene-m/go-rest-api
 
 go 1.20
 

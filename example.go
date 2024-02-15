@@ -2,11 +2,14 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -22,7 +25,15 @@ type album struct {
 var dataMap = make(map[string]string)
 
 func main(){
-    connectionStr := "postgres://postgres:M5Comp@localhost:5432/GoTodoapp?sslmode=disable"
+    err := godotenv.Load(".env")
+    if err != nil {
+        log.Fatalf("Error loading .env file: %v", err)
+    }
+    dbPassword := os.Getenv("DB_PASSWORD")
+    dbName := os.Getenv("DB_NAME")
+    dbPort := os.Getenv("DB_PORT")
+
+    connectionStr := fmt.Sprintf("postgres://postgres:%s@localhost:%s/%s?sslmode=disable", dbPassword, dbPort, dbName)
     db, err := sql.Open("postgres", connectionStr)
     defer db.Close()
 

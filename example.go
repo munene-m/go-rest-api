@@ -57,19 +57,11 @@ func main(){
         }
     }
 
-	r.POST("/name/:name", postName)
-	r.GET("/names/:name", getNames)
-	// r.GET("/albums", getAlbums)
 	r.GET("/albums/:id", getAlbumHandler(db))
 	r.POST("/albums", postAlbumsHandler(db) )
-	// r.DELETE("/albums/delete/:id", deleteAlbum)
 
 	r.Run(":8080") //listen and serve on 0.0.0.0:8000 
 }
-
-// func getAlbums(c *gin.Context) {
-//     c.IndentedJSON(http.StatusOK, albums)
-// }
 
 func createAlbumStore(db *sql.DB){
     query := `CREATE TABLE IF NOT EXISTS albumStore (
@@ -101,13 +93,10 @@ func postAlbums(c *gin.Context,  db *sql.DB){
     }
 
     if exists {
-        // Album with the same title already exists in the database
         c.JSON(http.StatusBadRequest, gin.H{"message": "Album already exists"})
         return
     }
 
-    // Add the new album to the slice.
-    // albums = append(albums, newAlbum)
     query := `INSERT INTO albumStore (title, artist, price)
     VALUES ($1, $2, $3) RETURNING id`
     
@@ -128,70 +117,12 @@ func getAlbumByID(c *gin.Context, db *sql.DB) {
     err := db.QueryRow(query, id).Scan(&album.ID, &album.Title, &album.Artist, &album.Price, &album.Created)
     if err != nil {
         if err == sql.ErrNoRows {
-            // If the album is not found, return a "not found" message in the response.
             c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
             return
         }
-        // Handle other errors
         log.Fatal(err)
         return
     }
 
-    // If the album is found, return its details in the response.
     c.JSON(http.StatusOK, album)
-}
-
-
-// func deleteAlbum(c *gin.Context) {
-//     // Get the ID of the album to be deleted from the URL parameters.
-//     id := c.Param("id")
-
-//     // Loop through the albums slice to find the album with the specified ID.
-//     for i, album := range albums {
-//         if album.ID == id {
-//             // Remove the album from the slice using slicing technique.
-//             albums = append(albums[:i], albums[i+1:]...)
-//             // Respond with a success message.
-//             c.JSON(http.StatusOK, gin.H{
-//                 "message": "Album deleted successfully",
-//                 "album":   album,
-//             })
-//             return
-//         }
-//     }
-
-//     // If the album with the specified ID is not found, respond with a 404 Not Found error.
-//     c.JSON(http.StatusNotFound, gin.H{
-//         "error": "Album not found",
-//     })
-// }
-
-
-func postName(c *gin.Context){
-	name := c.Param("name")
-		dataMap[name] = name
-
-		c.JSON(http.StatusOK, gin.H{
-			"message":"Name posted successfully.",
-			
-		})
-}
-
-func getNames(c *gin.Context){
-	paramName := c.Param("name")
-
-	// Check if the provided name exists in the map
-	name, ok := dataMap[paramName]
-	if !ok {
-		// If the name does not exist in the map, return a 404 Not Found response
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Name not found",
-		})
-		return
-	}
-
-	// Respond with the name from the map in the JSON response
-	c.JSON(http.StatusOK, gin.H{
-		"name": name,
-	})
 }
